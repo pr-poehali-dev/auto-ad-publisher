@@ -19,6 +19,7 @@ interface CarListing {
   description: string;
   status: 'active' | 'pending';
   platforms: string[];
+  photos: string[];
 }
 
 const Index = () => {
@@ -33,7 +34,8 @@ const Index = () => {
       price: '2500000',
       description: 'Отличное состояние, один владелец',
       status: 'active',
-      platforms: ['Авито', 'Дром', 'Авто.ру']
+      platforms: ['Авито', 'Дром', 'Авто.ру'],
+      photos: []
     }
   ]);
 
@@ -46,13 +48,39 @@ const Index = () => {
     description: ''
   });
 
+  const [photos, setPhotos] = useState<string[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const newPhotos = Array.from(files).slice(0, 20 - photos.length).map(file => URL.createObjectURL(file));
+      setPhotos([...photos, ...newPhotos]);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const files = e.dataTransfer.files;
+    if (files) {
+      const newPhotos = Array.from(files).slice(0, 20 - photos.length).map(file => URL.createObjectURL(file));
+      setPhotos([...photos, ...newPhotos]);
+    }
+  };
+
+  const removePhoto = (index: number) => {
+    setPhotos(photos.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const newListing: CarListing = {
       id: Date.now().toString(),
       ...formData,
       status: 'pending',
-      platforms: ['Авито', 'Дром', 'Авто.ру']
+      platforms: ['Авито', 'Дром', 'Авто.ру'],
+      photos: photos
     };
     setListings([...listings, newListing]);
     setFormData({
@@ -63,6 +91,7 @@ const Index = () => {
       price: '',
       description: ''
     });
+    setPhotos([]);
     toast.success('Объявление создано! Публикация на площадках...');
     setActiveTab('listings');
   };
@@ -306,6 +335,59 @@ const Index = () => {
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                         required
                       />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Фотографии (до 20 штук)</Label>
+                      <div
+                        className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                          isDragging ? 'border-primary bg-primary/5' : 'border-muted-foreground/25'
+                        }`}
+                        onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                        onDragLeave={() => setIsDragging(false)}
+                        onDrop={handleDrop}
+                      >
+                        <input
+                          type="file"
+                          id="photos"
+                          accept="image/*"
+                          multiple
+                          className="hidden"
+                          onChange={handlePhotoUpload}
+                        />
+                        <label htmlFor="photos" className="cursor-pointer">
+                          <div className="flex flex-col items-center gap-2">
+                            <Icon name="Upload" size={40} className="text-muted-foreground" />
+                            <p className="text-sm text-muted-foreground">
+                              Перетащите фото сюда или <span className="text-primary underline">выберите файлы</span>
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Загружено: {photos.length} / 20
+                            </p>
+                          </div>
+                        </label>
+                      </div>
+
+                      {photos.length > 0 && (
+                        <div className="grid grid-cols-4 md:grid-cols-6 gap-3 mt-4">
+                          {photos.map((photo, index) => (
+                            <div key={index} className="relative group aspect-square">
+                              <img
+                                src={photo}
+                                alt={`Фото ${index + 1}`}
+                                className="w-full h-full object-cover rounded-lg"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removePhoto(index)}
+                                className="absolute -top-2 -right-2 w-6 h-6 bg-destructive text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                              >
+                                <Icon name="X" size={14} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex gap-3 justify-end">
