@@ -9,6 +9,14 @@ import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
 
+interface Template {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  icon: string;
+}
+
 interface CarListing {
   id: string;
   brand: string;
@@ -50,6 +58,59 @@ const Index = () => {
 
   const [photos, setPhotos] = useState<string[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+
+  const templates: Template[] = [
+    {
+      id: '1',
+      name: 'Седан премиум',
+      category: 'Легковые',
+      description: 'Автомобиль в отличном состоянии. Полная комплектация, кожаный салон, панорамная крыша. Один владелец, вся история обслуживания у официального дилера. Не битый, не крашеный. Все ТО пройдены вовремя.',
+      icon: 'Car'
+    },
+    {
+      id: '2',
+      name: 'Внедорожник',
+      category: 'Внедорожники',
+      description: 'Мощный внедорожник с полным приводом. Отличная проходимость, надежный двигатель. Идеален для бездорожья и дальних поездок. Кузов и рама без повреждений, все узлы в рабочем состоянии.',
+      icon: 'Mountain'
+    },
+    {
+      id: '3',
+      name: 'Компактный городской',
+      category: 'Легковые',
+      description: 'Экономичный автомобиль для города. Малый расход топлива, компактные размеры, легкая парковка. Идеально подходит для ежедневных поездок. Техническое состояние отличное, все системы исправны.',
+      icon: 'Home'
+    },
+    {
+      id: '4',
+      name: 'Семейный минивэн',
+      category: 'Минивэны',
+      description: 'Просторный семейный автомобиль на 7 мест. Комфортный салон, большой багажник, климат-контроль. Отличный вариант для больших семей и путешествий. Бережная эксплуатация, полный пакет документов.',
+      icon: 'Users'
+    },
+    {
+      id: '5',
+      name: 'Бизнес-класс',
+      category: 'Представительские',
+      description: 'Премиальный автомобиль бизнес-класса. Максимальный уровень комфорта и безопасности. Кожаный салон, мультимедийная система, адаптивный круиз-контроль. Автомобиль обслуживался только у официального дилера.',
+      icon: 'Briefcase'
+    },
+    {
+      id: '6',
+      name: 'Спортивное купе',
+      category: 'Спортивные',
+      description: 'Динамичный спортивный автомобиль. Мощный двигатель, агрессивный дизайн, отличная управляемость. Спортивная подвеска, улучшенная тормозная система. Для тех, кто ценит скорость и драйв.',
+      icon: 'Zap'
+    }
+  ];
+
+  const applyTemplate = (template: Template) => {
+    setFormData({
+      ...formData,
+      description: template.description
+    });
+    toast.success(`Шаблон "${template.name}" применен`);
+  };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -108,6 +169,7 @@ const Index = () => {
             <nav className="hidden md:flex gap-6">
               <Button variant="ghost" onClick={() => setActiveTab('home')}>Главная</Button>
               <Button variant="ghost" onClick={() => setActiveTab('listings')}>Мои объявления</Button>
+              <Button variant="ghost" onClick={() => setActiveTab('templates')}>Шаблоны</Button>
               <Button variant="ghost" onClick={() => setActiveTab('pricing')}>Тарифы</Button>
               <Button variant="ghost" onClick={() => setActiveTab('guide')}>Инструкция</Button>
               <Button variant="ghost" onClick={() => setActiveTab('support')}>Поддержка</Button>
@@ -265,6 +327,37 @@ const Index = () => {
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="bg-muted/50 rounded-lg p-4 mb-6">
+                      <div className="flex items-center justify-between mb-3">
+                        <Label className="text-base font-semibold">Быстрое заполнение</Label>
+                        <Button 
+                          type="button" 
+                          variant="link" 
+                          size="sm"
+                          onClick={() => setActiveTab('templates')}
+                          className="gap-1"
+                        >
+                          <Icon name="FileText" size={16} />
+                          Все шаблоны
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        {templates.slice(0, 3).map((template) => (
+                          <Button
+                            key={template.id}
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => applyTemplate(template)}
+                            className="justify-start gap-2 h-auto py-2"
+                          >
+                            <Icon name={template.icon as any} size={16} />
+                            <span className="text-xs">{template.name}</span>
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="brand">Марка *</Label>
@@ -402,6 +495,59 @@ const Index = () => {
                   </form>
                 </CardContent>
               </Card>
+            </div>
+          </section>
+        </TabsContent>
+
+        <TabsContent value="templates" className="mt-0">
+          <section className="py-12">
+            <div className="container mx-auto px-4">
+              <div className="mb-8 text-center">
+                <h2 className="text-4xl font-bold mb-3">Шаблоны объявлений</h2>
+                <p className="text-muted-foreground max-w-2xl mx-auto">
+                  Готовые описания для быстрого создания объявлений. Выберите подходящий шаблон и адаптируйте под свой автомобиль
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                {templates.map((template) => (
+                  <Card key={template.id} className="hover-scale">
+                    <CardHeader>
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                          <Icon name={template.icon as any} size={24} className="text-primary" />
+                        </div>
+                        <Badge variant="secondary">{template.category}</Badge>
+                      </div>
+                      <CardTitle className="text-xl">{template.name}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <p className="text-sm text-muted-foreground line-clamp-4">
+                        {template.description}
+                      </p>
+                      <Button 
+                        className="w-full gap-2" 
+                        onClick={() => {
+                          applyTemplate(template);
+                          setActiveTab('create');
+                        }}
+                      >
+                        <Icon name="Copy" size={16} />
+                        Применить шаблон
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              <div className="mt-12 text-center">
+                <p className="text-muted-foreground mb-4">
+                  Нужен индивидуальный шаблон для вашего автосалона?
+                </p>
+                <Button variant="outline" onClick={() => setActiveTab('support')}>
+                  Связаться с поддержкой
+                </Button>
+              </div>
             </div>
           </section>
         </TabsContent>
