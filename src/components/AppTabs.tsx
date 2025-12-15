@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { getYears, mileageRanges, priceRanges } from '@/data/carFilters';
+import { getYears } from '@/data/carFilters';
 
 interface Template {
   id: string;
@@ -313,36 +313,32 @@ export const AppTabs = ({
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="mileage">Пробег *</Label>
-                      <Select value={formData.mileage} onValueChange={(value) => setFormData({ ...formData, mileage: value })} required>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Выберите пробег" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {mileageRanges.map((range, index) => (
-                            <SelectItem key={index} value={range.max.toString()}>
-                              {range.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Label htmlFor="mileage">Пробег (км) *</Label>
+                      <Input
+                        id="mileage"
+                        type="number"
+                        placeholder="45000"
+                        value={formData.mileage}
+                        onChange={(e) => setFormData({ ...formData, mileage: e.target.value })}
+                        min="0"
+                        step="1000"
+                        required
+                      />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="price">Цена *</Label>
-                    <Select value={formData.price} onValueChange={(value) => setFormData({ ...formData, price: value })} required>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Выберите диапазон цены" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {priceRanges.map((range, index) => (
-                          <SelectItem key={index} value={range.max.toString()}>
-                            {range.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Label htmlFor="price">Цена (₽) *</Label>
+                    <Input
+                      id="price"
+                      type="number"
+                      placeholder="2500000"
+                      value={formData.price}
+                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                      min="0"
+                      step="10000"
+                      required
+                    />
                   </div>
 
                   <div className="space-y-2">
