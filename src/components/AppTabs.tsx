@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { getYears, mileageRanges, priceRanges } from '@/data/carFilters';
 
 interface Template {
   id: string;
@@ -298,38 +299,50 @@ export const AppTabs = ({
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="year">Год выпуска *</Label>
-                      <Input
-                        id="year"
-                        type="number"
-                        placeholder="2020"
-                        value={formData.year}
-                        onChange={(e) => setFormData({ ...formData, year: e.target.value })}
-                        required
-                      />
+                      <Select value={formData.year} onValueChange={(value) => setFormData({ ...formData, year: value })} required>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Выберите год" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {getYears().map((year) => (
+                            <SelectItem key={year} value={year.toString()}>
+                              {year}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="mileage">Пробег (км) *</Label>
-                      <Input
-                        id="mileage"
-                        type="number"
-                        placeholder="45000"
-                        value={formData.mileage}
-                        onChange={(e) => setFormData({ ...formData, mileage: e.target.value })}
-                        required
-                      />
+                      <Label htmlFor="mileage">Пробег *</Label>
+                      <Select value={formData.mileage} onValueChange={(value) => setFormData({ ...formData, mileage: value })} required>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Выберите пробег" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {mileageRanges.map((range, index) => (
+                            <SelectItem key={index} value={range.max.toString()}>
+                              {range.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="price">Цена (₽) *</Label>
-                    <Input
-                      id="price"
-                      type="number"
-                      placeholder="2500000"
-                      value={formData.price}
-                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                      required
-                    />
+                    <Label htmlFor="price">Цена *</Label>
+                    <Select value={formData.price} onValueChange={(value) => setFormData({ ...formData, price: value })} required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Выберите диапазон цены" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {priceRanges.map((range, index) => (
+                          <SelectItem key={index} value={range.max.toString()}>
+                            {range.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-2">
