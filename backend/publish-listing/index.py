@@ -20,82 +20,102 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
           context - объект с атрибутами request_id, function_name
     Returns: HTTP response с результатами публикации на каждой площадке
     '''
-    method: str = event.get('httpMethod', 'POST')
-    
-    if method == 'OPTIONS':
+    try:
+        method: str = event.get('httpMethod', 'POST')
+        
+        if method == 'OPTIONS':
+            return {
+                'statusCode': 200,
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                    'Access-Control-Allow-Headers': 'Content-Type, X-User-Id',
+                    'Access-Control-Max-Age': '86400'
+                },
+                'body': '',
+                'isBase64Encoded': False
+            }
+        
+        if method != 'POST':
+            return {
+                'statusCode': 405,
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
+                'isBase64Encoded': False,
+                'body': json.dumps({'error': 'Method not allowed'})
+            }
+        
+        body_data = json.loads(event.get('body', '{}'))
+        listing = ListingData(**body_data)
+        
+        avito_client_id = os.environ.get('AVITO_CLIENT_ID', '')
+        avito_client_secret = os.environ.get('AVITO_CLIENT_SECRET', '')
+        
+        request_id = getattr(context, 'request_id', 'unknown')
+        if len(request_id) < 12:
+            request_id = request_id + '0' * (12 - len(request_id))
+        
+        results = {
+            'success': True,
+            'platforms': [],
+            'listing_id': f"listing_{request_id[:8]}"
+        }
+        
+        if avito_client_id and avito_client_secret:
+            avito_result = publish_to_avito(listing, avito_client_id, avito_client_secret)
+            results['platforms'].append({
+                'name': 'Авито',
+                'status': avito_result['status'],
+                'url': avito_result.get('url', ''),
+                'message': avito_result.get('message', '')
+            })
+        else:
+            results['platforms'].append({
+                'name': 'Авито',
+                'status': 'pending',
+                'url': f'https://www.avito.ru/items/{request_id[:12]}',
+                'message': 'API ключи не настроены. Объявление будет опубликовано после настройки интеграции.'
+            })
+        
+        results['platforms'].append({
+            'name': 'Дром',
+            'status': 'pending',
+            'url': f'https://auto.drom.ru/item/{request_id[:10]}',
+            'message': 'Объявление будет опубликовано после настройки интеграции с Дром.'
+        })
+        
+        results['platforms'].append({
+            'name': 'Авто.ру',
+            'status': 'pending',
+            'url': f'https://auto.ru/cars/used/sale/{request_id[:12]}',
+            'message': 'Объявление будет опубликовано после настройки интеграции с Авто.ру.'
+        })
+        
         return {
             'statusCode': 200,
-            'headers': {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'POST, OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type, X-User-Id',
-                'Access-Control-Max-Age': '86400'
-            },
-            'body': ''
-        }
-    
-    if method != 'POST':
-        return {
-            'statusCode': 405,
             'headers': {
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*'
             },
             'isBase64Encoded': False,
-            'body': json.dumps({'error': 'Method not allowed'})
+            'body': json.dumps(results, ensure_ascii=False)
         }
-    
-    body_data = json.loads(event.get('body', '{}'))
-    listing = ListingData(**body_data)
-    
-    avito_client_id = os.environ.get('AVITO_CLIENT_ID', '')
-    avito_client_secret = os.environ.get('AVITO_CLIENT_SECRET', '')
-    
-    results = {
-        'success': True,
-        'platforms': [],
-        'listing_id': f"listing_{context.request_id[:8]}"
-    }
-    
-    if avito_client_id and avito_client_secret:
-        avito_result = publish_to_avito(listing, avito_client_id, avito_client_secret)
-        results['platforms'].append({
-            'name': 'Авито',
-            'status': avito_result['status'],
-            'url': avito_result.get('url', ''),
-            'message': avito_result.get('message', '')
-        })
-    else:
-        results['platforms'].append({
-            'name': 'Авито',
-            'status': 'pending',
-            'url': f'https://www.avito.ru/items/{context.request_id[:12]}',
-            'message': 'API ключи не настроены. Объявление будет опубликовано после настройки интеграции.'
-        })
-    
-    results['platforms'].append({
-        'name': 'Дром',
-        'status': 'pending',
-        'url': f'https://auto.drom.ru/item/{context.request_id[:10]}',
-        'message': 'Объявление будет опубликовано после настройки интеграции с Дром.'
-    })
-    
-    results['platforms'].append({
-        'name': 'Авто.ру',
-        'status': 'pending',
-        'url': f'https://auto.ru/cars/used/sale/{context.request_id[:12]}',
-        'message': 'Объявление будет опубликовано после настройки интеграции с Авто.ру.'
-    })
-    
-    return {
-        'statusCode': 200,
-        'headers': {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*'
-        },
-        'isBase64Encoded': False,
-        'body': json.dumps(results, ensure_ascii=False)
-    }
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
+            'isBase64Encoded': False,
+            'body': json.dumps({
+                'success': False,
+                'error': str(e),
+                'message': 'Ошибка при обработке запроса'
+            }, ensure_ascii=False)
+        }
 
 def publish_to_avito(listing: ListingData, client_id: str, client_secret: str) -> Dict[str, Any]:
     '''
