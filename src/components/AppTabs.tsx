@@ -513,10 +513,8 @@ export const AppTabs = ({
                           <Icon name="Car" size={48} className="text-muted-foreground" />
                         </div>
                       )}
-                      <Badge className={`absolute top-2 right-2 ${
-                        listing.status === 'active' ? 'bg-green-500' : 'bg-yellow-500'
-                      }`}>
-                        {listing.status === 'active' ? 'Активно' : 'На модерации'}
+                      <Badge className="absolute top-2 right-2 bg-green-500">
+                        Активно
                       </Badge>
                     </div>
                     <CardContent className="p-4">
