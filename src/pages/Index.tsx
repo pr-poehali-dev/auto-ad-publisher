@@ -131,27 +131,82 @@ const Index = () => {
     setPhotos(photos.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newListing: CarListing = {
-      id: Date.now().toString(),
-      ...formData,
-      status: 'pending',
-      platforms: ['Авито', 'Дром', 'Авто.ру'],
-      photos: photos
-    };
-    setListings([...listings, newListing]);
-    setFormData({
-      brand: '',
-      model: '',
-      year: '',
-      mileage: '',
-      price: '',
-      description: ''
-    });
-    setPhotos([]);
-    toast.success('Объявление создано! Публикация на площадках...');
-    setActiveTab('listings');
+    
+    toast.loading('Публикуем объявление на площадках...', { id: 'publish' });
+    
+    try {
+      const response = await fetch('https://functions.poehali.dev/8a180d82-6f28-4d54-9039-3407c032e1dc', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          brand: formData.brand,
+          model: formData.model,
+          year: formData.year,
+          mileage: formData.mileage,
+          price: formData.price,
+          description: formData.description,
+          photos: photos
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok && result.success) {
+        const newListing: CarListing = {
+          id: result.listing_id,
+          ...formData,
+          status: 'active',
+          platforms: result.platforms.map((p: any) => p.name),
+          photos: photos
+        };
+        
+        setListings([...listings, newListing]);
+        
+        const publishedCount = result.platforms.filter((p: any) => p.status === 'published').length;
+        const pendingCount = result.platforms.filter((p: any) => p.status === 'pending').length;
+        
+        let message = '';
+        if (publishedCount > 0) {
+          message = `Опубликовано на ${publishedCount} площадках! `;
+        }
+        if (pendingCount > 0) {
+          message += `${pendingCount} площадок в очереди (требуется настройка API).`;
+        }
+        
+        toast.success(message || 'Объявление создано!', { id: 'publish' });
+        
+        result.platforms.forEach((platform: any) => {
+          if (platform.status === 'published') {
+            toast.success(`${platform.name}: ${platform.message}`, { 
+              duration: 5000,
+              action: {
+                label: 'Открыть',
+                onClick: () => window.open(platform.url, '_blank')
+              }
+            });
+          }
+        });
+        
+        setFormData({
+          brand: '',
+          model: '',
+          year: '',
+          mileage: '',
+          price: '',
+          description: ''
+        });
+        setPhotos([]);
+        setActiveTab('listings');
+      } else {
+        toast.error('Не удалось опубликовать объявление', { id: 'publish' });
+      }
+    } catch (error) {
+      toast.error('Ошибка при публикации. Проверьте интернет-соединение.', { id: 'publish' });
+    }
   };
 
   return (

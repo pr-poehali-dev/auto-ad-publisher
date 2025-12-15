@@ -1,0 +1,31 @@
+{
+  "tests": [
+    {
+      "name": "Успешная публикация объявления",
+      "method": "POST",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "brand": "Toyota",
+        "model": "Camry",
+        "year": "2020",
+        "mileage": "45000",
+        "price": "2500000",
+        "description": "Отличное состояние, один владелец, полная комплектация",
+        "photos": []
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true,
+        "listing_id": "string"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Обработка OPTIONS запроса",
+      "method": "OPTIONS",
+      "expectedStatus": 200
+    }
+  ]
+}
