@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Tabs } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { Header } from '@/components/Header';
@@ -30,20 +30,7 @@ interface CarListing {
 const Index = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [listings, setListings] = useState<CarListing[]>([
-    {
-      id: '1',
-      brand: 'Toyota',
-      model: 'Camry',
-      year: '2020',
-      mileage: '45000',
-      price: '2500000',
-      description: 'Отличное состояние, один владелец',
-      status: 'active',
-      platforms: ['Авито', 'Дром', 'Авто.ру'],
-      photos: []
-    }
-  ]);
+  const [listings, setListings] = useState<CarListing[]>([]);
 
   const [formData, setFormData] = useState({
     brand: '',
@@ -62,6 +49,37 @@ const Index = () => {
     setFormData({ ...formData, brand, model: '' });
     setAvailableModels(getModelsByBrand(brand));
   };
+
+  const loadListings = async () => {
+    try {
+      const response = await fetch('https://functions.poehali.dev/8a180d82-6f28-4d54-9039-3407c032e1dc');
+      const result = await response.json();
+      
+      if (result.success && result.listings) {
+        const formattedListings = result.listings.map((listing: any) => ({
+          id: listing.listing_id,
+          brand: listing.brand,
+          model: listing.model,
+          year: listing.year,
+          mileage: listing.mileage,
+          price: listing.price,
+          description: listing.description,
+          status: listing.status,
+          platforms: Array.isArray(listing.platforms) 
+            ? listing.platforms.map((p: any) => p.name) 
+            : [],
+          photos: Array.isArray(listing.photos) ? listing.photos : []
+        }));
+        setListings(formattedListings);
+      }
+    } catch (error) {
+      console.error('Ошибка загрузки объявлений:', error);
+    }
+  };
+
+  useEffect(() => {
+    loadListings();
+  }, []);
 
   const templates: Template[] = [
     {
@@ -171,7 +189,7 @@ const Index = () => {
           photos: photos
         };
         
-        setListings([...listings, newListing]);
+
         
         const publishedCount = result.platforms.filter((p: any) => p.status === 'published').length;
         const pendingCount = result.platforms.filter((p: any) => p.status === 'pending').length;
@@ -208,6 +226,7 @@ const Index = () => {
         });
         setPhotos([]);
         setAvailableModels([]);
+        await loadListings();
         setActiveTab('listings');
       } else {
         toast.error('Не удалось опубликовать объявление', { id: 'publish' });
