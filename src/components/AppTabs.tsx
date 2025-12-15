@@ -119,7 +119,7 @@ export const AppTabs = ({
               </p>
             </div>
             <div className="grid md:grid-cols-3 gap-8">
-              <Card className="hover-scale border-2 hover:border-primary transition-colors">
+              <Card className="hover-scale border-2 hover:border-primary transition-colors cursor-pointer" onClick={() => setActiveTab('create')}>
                 <CardHeader>
                   <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
                     <Icon name="Rocket" size={24} className="text-primary" />
@@ -131,7 +131,7 @@ export const AppTabs = ({
                 </CardHeader>
               </Card>
 
-              <Card className="hover-scale border-2 hover:border-primary transition-colors">
+              <Card className="hover-scale border-2 hover:border-primary transition-colors cursor-pointer" onClick={() => setActiveTab('templates')}>
                 <CardHeader>
                   <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mb-4">
                     <Icon name="FileStack" size={24} className="text-accent" />
@@ -143,7 +143,7 @@ export const AppTabs = ({
                 </CardHeader>
               </Card>
 
-              <Card className="hover-scale border-2 hover:border-primary transition-colors">
+              <Card className="hover-scale border-2 hover:border-primary transition-colors cursor-pointer" onClick={() => setActiveTab('listings')}>
                 <CardHeader>
                   <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
                     <Icon name="BarChart3" size={24} className="text-primary" />
@@ -155,7 +155,7 @@ export const AppTabs = ({
                 </CardHeader>
               </Card>
 
-              <Card className="hover-scale border-2 hover:border-accent transition-colors">
+              <Card className="hover-scale border-2 hover:border-accent transition-colors cursor-pointer" onClick={() => setActiveTab('pricing')}>
                 <CardHeader>
                   <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mb-4">
                     <Icon name="RefreshCw" size={24} className="text-accent" />
@@ -167,7 +167,7 @@ export const AppTabs = ({
                 </CardHeader>
               </Card>
 
-              <Card className="hover-scale border-2 hover:border-accent transition-colors">
+              <Card className="hover-scale border-2 hover:border-accent transition-colors cursor-pointer" onClick={() => setActiveTab('guide')}>
                 <CardHeader>
                   <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
                     <Icon name="Database" size={24} className="text-primary" />
@@ -179,7 +179,7 @@ export const AppTabs = ({
                 </CardHeader>
               </Card>
 
-              <Card className="hover-scale border-2 hover:border-primary transition-colors">
+              <Card className="hover-scale border-2 hover:border-primary transition-colors cursor-pointer" onClick={() => setActiveTab('support')}>
                 <CardHeader>
                   <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mb-4">
                     <Icon name="Shield" size={24} className="text-accent" />
