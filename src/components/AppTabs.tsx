@@ -806,7 +806,7 @@ export const AppTabs = ({
                 </CardHeader>
               </Card>
 
-              <Card className="hover-scale">
+              <Card className="hover-scale cursor-pointer" onClick={() => setActiveTab('knowledge')}>
                 <CardHeader>
                   <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mb-4">
                     <Icon name="FileText" size={24} className="text-accent" />
@@ -853,6 +853,165 @@ export const AppTabs = ({
                 </form>
               </CardContent>
             </Card>
+          </div>
+        </section>
+      </TabsContent>
+
+      <TabsContent value="knowledge" className="mt-0">
+        <section className="py-12">
+          <div className="container mx-auto px-4 max-w-4xl">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold mb-4">База знаний</h2>
+              <p className="text-muted-foreground">
+                Ответы на частые вопросы о работе с платформой
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Icon name="HelpCircle" size={20} className="text-primary" />
+                    Как создать объявление?
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    Нажмите кнопку "Создать объявление", заполните форму с данными автомобиля 
+                    (марка, модель, год, пробег, цена), добавьте описание и загрузите фотографии. 
+                    После нажатия "Опубликовать" объявление автоматически размещается на Авито, Дром и Авто.ру.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Icon name="HelpCircle" size={20} className="text-primary" />
+                    Какие тарифы доступны?
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-muted-foreground space-y-2">
+                    <p><strong>Стартовый (990₽/мес)</strong> — до 10 объявлений, базовая статистика</p>
+                    <p><strong>Профессионал (2990₽/мес)</strong> — до 100 объявлений, шаблоны, автопродление</p>
+                    <p><strong>Корпоративный (9990₽/мес)</strong> — безлимит, интеграция с CRM, API доступ</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Icon name="HelpCircle" size={20} className="text-primary" />
+                    Как работают шаблоны описаний?
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    В разделе "Шаблоны" выберите готовый шаблон описания (седан, внедорожник, компактный и др.). 
+                    При создании объявления нажмите на шаблон — текст автоматически подставится в поле описания. 
+                    Вы можете отредактировать его под конкретный автомобиль.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Icon name="HelpCircle" size={20} className="text-primary" />
+                    Как загружать фотографии?
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    При создании объявления перетащите фото в зону загрузки или нажмите "Выбрать файлы". 
+                    Максимум 20 фотографий на объявление. Рекомендуемые форматы: JPG, PNG. 
+                    Первое фото станет главным в объявлении.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Icon name="HelpCircle" size={20} className="text-primary" />
+                    Что такое автопродление?
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    Автопродление автоматически поднимает ваши объявления в топ выдачи на площадках 
+                    каждые 24 часа. Это увеличивает количество просмотров и ускоряет продажу. 
+                    Функция доступна в тарифах "Профессионал" и "Корпоративный".
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Icon name="HelpCircle" size={20} className="text-primary" />
+                    Как отслеживать статистику?
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    В разделе "Мои объявления" под каждым объявлением отображается количество 
+                    просмотров по каждой площадке. В тарифах "Профессионал" и "Корпоративный" 
+                    доступна расширенная аналитика: графики просмотров, конверсия, источники трафика.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Icon name="HelpCircle" size={20} className="text-primary" />
+                    Как изменить или удалить объявление?
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    Откройте "Мои объявления", нажмите на нужное объявление. Вы увидите кнопки 
+                    "Редактировать" и "Удалить". После редактирования изменения автоматически 
+                    применяются на всех площадках в течение 5-10 минут.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Icon name="HelpCircle" size={20} className="text-primary" />
+                    Нужна ли интеграция с площадками?
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    Да, для автоматической публикации нужно подключить API-ключи от Авито, Дром и Авто.ру. 
+                    Инструкция по получению ключей доступна в личном кабинете в разделе "Настройки" → "Интеграции". 
+                    Это одноразовая настройка, занимает 5-10 минут.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="mt-12 text-center">
+              <p className="text-muted-foreground mb-4">
+                Не нашли ответ на свой вопрос?
+              </p>
+              <div className="flex gap-4 justify-center flex-wrap">
+                <Button onClick={() => setIsChatOpen(true)} className="gap-2">
+                  <Icon name="MessageCircle" size={18} />
+                  Спросить в чате
+                </Button>
+                <Button variant="outline" onClick={() => setActiveTab('support')} className="gap-2">
+                  <Icon name="Mail" size={18} />
+                  Написать в поддержку
+                </Button>
+              </div>
+            </div>
           </div>
         </section>
       </TabsContent>
