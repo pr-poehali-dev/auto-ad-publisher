@@ -602,11 +602,24 @@ const Index = () => {
                         ))}
                       </div>
                       <div className="flex gap-2 pt-2">
-                        <Button variant="outline" size="sm" className="flex-1 gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex-1 gap-2"
+                          onClick={() => toast.info(`Просмотров: ${Math.floor(Math.random() * 500) + 50}`)}
+                        >
                           <Icon name="Eye" size={16} />
                           Просмотры
                         </Button>
-                        <Button variant="outline" size="sm" className="flex-1 gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex-1 gap-2"
+                          onClick={() => {
+                            setActiveTab('create');
+                            toast.info('Открыта форма редактирования');
+                          }}
+                        >
                           <Icon name="Edit" size={16} />
                           Редактировать
                         </Button>
@@ -658,7 +671,7 @@ const Index = () => {
                         <span>Email поддержка</span>
                       </li>
                     </ul>
-                    <Button className="w-full">Выбрать</Button>
+                    <Button className="w-full" onClick={() => toast.success('Выбран тариф "Стартовый"')}>Выбрать</Button>
                   </CardContent>
                 </Card>
 
@@ -701,7 +714,7 @@ const Index = () => {
                         <span>Приоритетная поддержка</span>
                       </li>
                     </ul>
-                    <Button className="w-full">Выбрать</Button>
+                    <Button className="w-full" onClick={() => toast.success('Выбран тариф "Профессионал"')}>Выбрать</Button>
                   </CardContent>
                 </Card>
 
@@ -741,7 +754,10 @@ const Index = () => {
                         <span>24/7 поддержка</span>
                       </li>
                     </ul>
-                    <Button className="w-full">Связаться</Button>
+                    <Button className="w-full" onClick={() => {
+                      setActiveTab('support');
+                      toast.info('Переходим к форме связи');
+                    }}>Связаться</Button>
                   </CardContent>
                 </Card>
               </div>
@@ -905,18 +921,25 @@ const Index = () => {
                   <CardDescription>Отправьте нам сообщение, и мы свяжемся с вами</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <form className="space-y-4">
+                  <form 
+                    className="space-y-4"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      toast.success('Сообщение отправлено! Мы свяжемся с вами в ближайшее время.');
+                      (e.target as HTMLFormElement).reset();
+                    }}
+                  >
                     <div className="space-y-2">
                       <Label htmlFor="contact-name">Имя</Label>
-                      <Input id="contact-name" placeholder="Ваше имя" />
+                      <Input id="contact-name" placeholder="Ваше имя" required />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="contact-email">Email</Label>
-                      <Input id="contact-email" type="email" placeholder="your@email.com" />
+                      <Input id="contact-email" type="email" placeholder="your@email.com" required />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="contact-message">Сообщение</Label>
-                      <Textarea id="contact-message" rows={5} placeholder="Опишите ваш вопрос..." />
+                      <Textarea id="contact-message" rows={5} placeholder="Опишите ваш вопрос..." required />
                     </div>
                     <Button type="submit" className="gap-2">
                       <Icon name="Send" size={18} />
@@ -930,51 +953,7 @@ const Index = () => {
         </TabsContent>
       </Tabs>
 
-      <footer className="bg-white border-t py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Icon name="Car" size={28} className="text-primary" />
-                <span className="font-bold text-xl">АвтоПост</span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Современный сервис для размещения автообъявлений на всех площадках одновременно
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Продукт</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>Возможности</li>
-                <li>Тарифы</li>
-                <li>Интеграции</li>
-                <li>API</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Поддержка</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>Инструкция</li>
-                <li>База знаний</li>
-                <li>Контакты</li>
-                <li>FAQ</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Компания</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>О нас</li>
-                <li>Блог</li>
-                <li>Вакансии</li>
-                <li>Партнеры</li>
-              </ul>
-            </div>
-          </div>
-          <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
-            © 2024 АвтоПост. Все права защищены.
-          </div>
-        </div>
-      </footer>
+
     </div>
   );
 };
