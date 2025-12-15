@@ -1,0 +1,31 @@
+{
+  "tests": [
+    {
+      "name": "Проверка AI-ответа на вопрос о тарифах",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "message": "Какие у вас тарифы?"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "reply": "string",
+        "model": "string"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Ошибка при пустом сообщении",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "message": ""
+      },
+      "expectedStatus": 400,
+      "expectedBody": {
+        "error": "string"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

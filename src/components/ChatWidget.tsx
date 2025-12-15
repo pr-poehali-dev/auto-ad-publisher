@@ -11,32 +11,44 @@ interface ChatWidgetProps {
 export const ChatWidget = ({ isOpen, onClose }: ChatWidgetProps) => {
   const [chatMessages, setChatMessages] = useState<{text: string; sender: 'user' | 'bot'}[]>([]);
   const [chatInput, setChatInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleChatSend = () => {
-    if (!chatInput.trim()) return;
+  const handleChatSend = async () => {
+    if (!chatInput.trim() || isLoading) return;
     
     const userMessage = { text: chatInput, sender: 'user' as const };
+    const currentInput = chatInput;
     setChatMessages([...chatMessages, userMessage]);
-    
-    const responses: Record<string, string> = {
-      'тариф': 'У нас 3 тарифа: Стартовый (990₽), Профессионал (2990₽) и Корпоративный (9990₽). Каждый включает публикацию на Авито, Дром и Авто.ру.',
-      'помощь': 'Я могу помочь вам с вопросами о тарифах, публикации объявлений и использовании платформы. Задайте ваш вопрос!',
-      'объявление': 'Создать объявление просто: нажмите "Создать", заполните форму с данными авто и загрузите фото. Мы автоматически опубликуем его на всех площадках.',
-      'контакт': 'Связаться можно по email yaer5hov@yandex.ru или телефону +7 915 321 88 71 (Пн-Пт 9:00-18:00).',
-      'привет': 'Здравствуйте! Я бот поддержки АвтоПост. Чем могу помочь?',
-      'шаблон': 'У нас есть готовые шаблоны описаний для разных типов авто: седаны, внедорожники, компактные и другие. Перейдите в раздел "Шаблоны".'
-    };
-    
-    setTimeout(() => {
-      const keyword = Object.keys(responses).find(key => chatInput.toLowerCase().includes(key));
-      const botResponse = keyword 
-        ? responses[keyword]
-        : 'Спасибо за вопрос! Наши специалисты ответят вам на email yaer5hov@yandex.ru или позвоните +7 915 321 88 71.';
-      
-      setChatMessages(prev => [...prev, { text: botResponse, sender: 'bot' }]);
-    }, 500);
-    
     setChatInput('');
+    setIsLoading(true);
+    
+    try {
+      const response = await fetch('https://functions.poehali.dev/11622567-5a4c-4795-a736-335ad0ebdb02', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: currentInput })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.reply) {
+        setChatMessages(prev => [...prev, { text: data.reply, sender: 'bot' }]);
+      } else {
+        setChatMessages(prev => [...prev, { 
+          text: 'Извините, произошла ошибка. Попробуйте еще раз или свяжитесь с нами: yaer5hov@yandex.ru', 
+          sender: 'bot' 
+        }]);
+      }
+    } catch (error) {
+      setChatMessages(prev => [...prev, { 
+        text: 'Не удалось подключиться к серверу. Проверьте интернет-соединение.', 
+        sender: 'bot' 
+      }]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -73,7 +85,7 @@ export const ChatWidget = ({ isOpen, onClose }: ChatWidgetProps) => {
             className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div 
-              className={`max-w-[80%] rounded-lg px-4 py-2 ${
+              className={`max-w-[80%] rounded-lg px-4 py-2 whitespace-pre-line ${
                 msg.sender === 'user' 
                   ? 'bg-primary text-white' 
                   : 'bg-muted text-foreground'
@@ -83,6 +95,18 @@ export const ChatWidget = ({ isOpen, onClose }: ChatWidgetProps) => {
             </div>
           </div>
         ))}
+        
+        {isLoading && (
+          <div className="flex justify-start">
+            <div className="bg-muted text-foreground rounded-lg px-4 py-2">
+              <div className="flex gap-1">
+                <span className="animate-bounce">●</span>
+                <span className="animate-bounce delay-100">●</span>
+                <span className="animate-bounce delay-200">●</span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       
       <div className="border-t p-3 flex gap-2">
@@ -90,9 +114,10 @@ export const ChatWidget = ({ isOpen, onClose }: ChatWidgetProps) => {
           placeholder="Напишите сообщение..."
           value={chatInput}
           onChange={(e) => setChatInput(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleChatSend()}
+          onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleChatSend()}
+          disabled={isLoading}
         />
-        <Button onClick={handleChatSend} size="icon">
+        <Button onClick={handleChatSend} size="icon" disabled={isLoading}>
           <Icon name="Send" size={18} />
         </Button>
       </div>
