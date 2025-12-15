@@ -7,6 +7,7 @@ import { TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface Template {
   id: string;
@@ -53,6 +54,9 @@ interface AppTabsProps {
   removePhoto: (index: number) => void;
   handleSubmit: (e: React.FormEvent) => void;
   setIsChatOpen: (open: boolean) => void;
+  availableBrands: string[];
+  availableModels: string[];
+  onBrandChange: (brand: string) => void;
 }
 
 export const AppTabs = ({
@@ -71,7 +75,10 @@ export const AppTabs = ({
   handleDrop,
   removePhoto,
   handleSubmit,
-  setIsChatOpen
+  setIsChatOpen,
+  availableBrands,
+  availableModels,
+  onBrandChange
 }: AppTabsProps) => {
   return (
     <>
@@ -253,23 +260,38 @@ export const AppTabs = ({
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="brand">Марка *</Label>
-                      <Input
-                        id="brand"
-                        placeholder="Toyota"
-                        value={formData.brand}
-                        onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
-                        required
-                      />
+                      <Select value={formData.brand} onValueChange={onBrandChange} required>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Выберите марку" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableBrands.map((brand) => (
+                            <SelectItem key={brand} value={brand}>
+                              {brand}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="model">Модель *</Label>
-                      <Input
-                        id="model"
-                        placeholder="Camry"
-                        value={formData.model}
-                        onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+                      <Select 
+                        value={formData.model} 
+                        onValueChange={(value) => setFormData({ ...formData, model: value })}
+                        disabled={!formData.brand}
                         required
-                      />
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder={formData.brand ? "Выберите модель" : "Сначала выберите марку"} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableModels.map((model) => (
+                            <SelectItem key={model} value={model}>
+                              {model}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 

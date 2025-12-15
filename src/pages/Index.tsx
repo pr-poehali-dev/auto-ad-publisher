@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { Header } from '@/components/Header';
 import { AppTabs } from '@/components/AppTabs';
 import { ChatWidget } from '@/components/ChatWidget';
+import { getAllBrands, getModelsByBrand } from '@/data/carDatabase';
 
 interface Template {
   id: string;
@@ -55,6 +56,12 @@ const Index = () => {
 
   const [photos, setPhotos] = useState<string[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+  const [availableModels, setAvailableModels] = useState<string[]>([]);
+
+  const handleBrandChange = (brand: string) => {
+    setFormData({ ...formData, brand, model: '' });
+    setAvailableModels(getModelsByBrand(brand));
+  };
 
   const templates: Template[] = [
     {
@@ -200,6 +207,7 @@ const Index = () => {
           description: ''
         });
         setPhotos([]);
+        setAvailableModels([]);
         setActiveTab('listings');
       } else {
         toast.error('Не удалось опубликовать объявление', { id: 'publish' });
@@ -231,6 +239,9 @@ const Index = () => {
           removePhoto={removePhoto}
           handleSubmit={handleSubmit}
           setIsChatOpen={setIsChatOpen}
+          availableBrands={getAllBrands()}
+          availableModels={availableModels}
+          onBrandChange={handleBrandChange}
         />
       </Tabs>
 
