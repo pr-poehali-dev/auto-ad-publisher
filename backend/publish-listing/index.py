@@ -18,7 +18,7 @@ class ListingData(BaseModel):
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     '''
     Публикация объявлений о продаже автомобилей на площадки Авито, Дром, Авто.ру
-    Args: event - dict с httpMethod, body (JSON с данными объявления)
+    Args: event - dict с httpMethod, body (JSON с данными объявления), headers
           context - объект с атрибутами request_id, function_name
     Returns: HTTP response с результатами публикации на каждой площадке
     '''
@@ -26,7 +26,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         method: str = event.get('httpMethod', 'POST')
         
         if method == 'GET':
-            return get_listings()
+            headers = event.get('headers', {})
+            user_id = headers.get('X-User-Id') or headers.get('x-user-id')
+            return get_listings(user_id)
         
         if method == 'OPTIONS':
             return {
@@ -50,6 +52,20 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 },
                 'isBase64Encoded': False,
                 'body': json.dumps({'error': 'Method not allowed'})
+            }
+        
+        headers = event.get('headers', {})
+        user_id = headers.get('X-User-Id') or headers.get('x-user-id')
+        
+        if not user_id:
+            return {
+                'statusCode': 401,
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
+                'isBase64Encoded': False,
+                'body': json.dumps({'error': 'Необходима авторизация'})
             }
         
         body_data = json.loads(event.get('body', '{}'))
@@ -98,7 +114,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'message': 'Объявление будет опубликовано после настройки интеграции с Авто.ру.'
         })
         
-        save_listing_to_db(listing, results)
+        save_listing_to_db(listing, results, user_id)
         
         return {
             'statusCode': 200,
@@ -195,21 +211,30 @@ def publish_to_avito(listing: ListingData, client_id: str, client_secret: str) -
             'message': f'Ошибка при публикации: {str(e)}'
         }
 
-def get_listings() -> Dict[str, Any]:
+def get_listings(user_id: Optional[str] = None) -> Dict[str, Any]:
     '''
-    Получение всех объявлений из базы данных
+    Получение объявлений из базы данных для конкретного пользователя
     '''
     try:
         dsn = os.environ.get('DATABASE_URL')
         conn = psycopg2.connect(dsn)
         cur = conn.cursor(cursor_factory=RealDictCursor)
         
-        cur.execute('''
-            SELECT listing_id, brand, model, year, mileage, price, description, 
-                   status, platforms, photos, created_at
-            FROM listings
-            ORDER BY created_at DESC
-        ''')
+        if user_id:
+            cur.execute('''
+                SELECT listing_id, brand, model, year, mileage, price, description, 
+                       status, platforms, photos, created_at, user_id
+                FROM t_p69695632_auto_ad_publisher.listings
+                WHERE user_id = %s
+                ORDER BY created_at DESC
+            ''', (int(user_id),))
+        else:
+            cur.execute('''
+                SELECT listing_id, brand, model, year, mileage, price, description, 
+                       status, platforms, photos, created_at, user_id
+                FROM t_p69695632_auto_ad_publisher.listings
+                ORDER BY created_at DESC
+            ''')
         
         rows = cur.fetchall()
         listings = [dict(row) for row in rows]
@@ -244,9 +269,9 @@ def get_listings() -> Dict[str, Any]:
             }, ensure_ascii=False)
         }
 
-def save_listing_to_db(listing: ListingData, results: Dict[str, Any]) -> None:
+def save_listing_to_db(listing: ListingData, results: Dict[str, Any], user_id: str) -> None:
     '''
-    Сохранение объявления в базу данных
+    Сохранение объявления в базу данных с привязкой к пользователю
     '''
     try:
         dsn = os.environ.get('DATABASE_URL')
@@ -260,9 +285,9 @@ def save_listing_to_db(listing: ListingData, results: Dict[str, Any]) -> None:
         status = 'active' if published_count > 0 else 'pending'
         
         cur.execute('''
-            INSERT INTO listings 
-            (listing_id, brand, model, year, mileage, price, description, status, platforms, photos)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO t_p69695632_auto_ad_publisher.listings 
+            (listing_id, brand, model, year, mileage, price, description, status, platforms, photos, user_id)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ''', (
             results['listing_id'],
             listing.brand,
@@ -273,7 +298,8 @@ def save_listing_to_db(listing: ListingData, results: Dict[str, Any]) -> None:
             listing.description,
             status,
             platforms_json,
-            photos_json
+            photos_json,
+            int(user_id)
         ))
         
         conn.commit()

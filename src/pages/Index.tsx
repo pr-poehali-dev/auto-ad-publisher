@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { Header } from '@/components/Header';
 import { AppTabs } from '@/components/AppTabs';
 import { ChatWidget } from '@/components/ChatWidget';
+import { AuthModal } from '@/components/AuthModal';
 import { getAllBrands, getModelsByBrand } from '@/data/carDatabase';
 
 interface Template {
@@ -31,6 +32,9 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [listings, setListings] = useState<CarListing[]>([]);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     brand: '',
@@ -40,6 +44,15 @@ const Index = () => {
     price: '',
     description: ''
   });
+
+  useEffect(() => {
+    const storedUserId = localStorage.getItem('userId');
+    const storedUsername = localStorage.getItem('username');
+    if (storedUserId && storedUsername) {
+      setUserId(storedUserId);
+      setUsername(storedUsername);
+    }
+  }, []);
 
   const [photos, setPhotos] = useState<string[]>([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -51,8 +64,13 @@ const Index = () => {
   };
 
   const loadListings = async () => {
+    if (!userId) return;
     try {
-      const response = await fetch('https://functions.poehali.dev/8a180d82-6f28-4d54-9039-3407c032e1dc');
+      const response = await fetch('https://functions.poehali.dev/8a180d82-6f28-4d54-9039-3407c032e1dc', {
+        headers: {
+          'X-User-Id': userId
+        }
+      });
       const result = await response.json();
       
       if (result.success && result.listings) {
@@ -78,8 +96,10 @@ const Index = () => {
   };
 
   useEffect(() => {
-    loadListings();
-  }, []);
+    if (userId) {
+      loadListings();
+    }
+  }, [userId]);
 
   const templates: Template[] = [
     {
@@ -159,6 +179,12 @@ const Index = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!userId) {
+      setShowAuthModal(true);
+      toast.error('Войдите в аккаунт для создания объявлений');
+      return;
+    }
+    
     toast.loading('Публикуем объявление на площадках...', { id: 'publish' });
     
     try {
@@ -166,6 +192,7 @@ const Index = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-User-Id': userId
         },
         body: JSON.stringify({
           brand: formData.brand,
@@ -236,9 +263,34 @@ const Index = () => {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('userId');
+    localStorage.removeItem('username');
+    localStorage.removeItem('token');
+    setUserId(null);
+    setUsername(null);
+    setListings([]);
+    toast.success('Вы вышли из аккаунта');
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      <Header activeTab={activeTab} setActiveTab={setActiveTab} />
+      {showAuthModal && (
+        <AuthModal
+          onClose={() => setShowAuthModal(false)}
+          onSuccess={(id, name) => {
+            setUserId(id);
+            setUsername(name);
+          }}
+        />
+      )}
+      <Header 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab}
+        username={username}
+        onLoginClick={() => setShowAuthModal(true)}
+        onLogoutClick={handleLogout}
+      />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <AppTabs
