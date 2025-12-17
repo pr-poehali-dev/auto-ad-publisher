@@ -5,6 +5,7 @@ import { Header } from '@/components/Header';
 import { AppTabs } from '@/components/AppTabs';
 import { ChatWidget } from '@/components/ChatWidget';
 import { AuthModal } from '@/components/AuthModal';
+import { UserProfile } from '@/components/UserProfile';
 import { getAllBrands, getModelsByBrand } from '@/data/carDatabase';
 
 interface Template {
@@ -33,6 +34,7 @@ const Index = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [listings, setListings] = useState<CarListing[]>([]);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [username, setUsername] = useState<string | null>(null);
 
@@ -284,12 +286,19 @@ const Index = () => {
           }}
         />
       )}
+      {showProfile && userId && (
+        <UserProfile
+          userId={userId}
+          onClose={() => setShowProfile(false)}
+        />
+      )}
       <Header 
         activeTab={activeTab} 
         setActiveTab={setActiveTab}
         username={username}
         onLoginClick={() => setShowAuthModal(true)}
         onLogoutClick={handleLogout}
+        onProfileClick={() => setShowProfile(true)}
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

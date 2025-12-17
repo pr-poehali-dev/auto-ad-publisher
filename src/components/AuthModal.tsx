@@ -13,6 +13,7 @@ export const AuthModal = ({ onClose, onSuccess }: AuthModalProps) => {
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -31,6 +32,7 @@ export const AuthModal = ({ onClose, onSuccess }: AuthModalProps) => {
           action: isLogin ? 'login' : 'register',
           username,
           password,
+          phone: isLogin ? undefined : phone,
         }),
       });
 
@@ -98,6 +100,20 @@ export const AuthModal = ({ onClose, onSuccess }: AuthModalProps) => {
             />
           </div>
 
+          {!isLogin && (
+            <div>
+              <Label htmlFor="phone">Номер телефона</Label>
+              <Input
+                id="phone"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+7 (999) 123-45-67"
+                required
+              />
+            </div>
+          )}
+
           {error && (
             <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm flex items-center gap-2">
               <Icon name="AlertCircle" size={16} />
@@ -118,6 +134,7 @@ export const AuthModal = ({ onClose, onSuccess }: AuthModalProps) => {
                 onClick={() => {
                   setIsLogin(false);
                   setError('');
+                  setPhone('');
                 }}
                 className="text-primary hover:underline"
               >
@@ -131,6 +148,7 @@ export const AuthModal = ({ onClose, onSuccess }: AuthModalProps) => {
                 onClick={() => {
                   setIsLogin(true);
                   setError('');
+                  setPhone('');
                 }}
                 className="text-primary hover:underline"
               >

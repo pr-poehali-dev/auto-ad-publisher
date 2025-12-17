@@ -42,6 +42,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     action = body_data.get('action')
     username = body_data.get('username', '').strip()
     password = body_data.get('password', '')
+    phone = body_data.get('phone', '').strip()
     
     if not username or not password:
         return {
@@ -72,6 +73,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     
     try:
         if action == 'register':
+            if not phone:
+                return {
+                    'statusCode': 400,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'Введите номер телефона'}),
+                    'isBase64Encoded': False
+                }
+            
             password_hash = hash_password(password)
             
             cur.execute(
@@ -87,8 +96,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 }
             
             cur.execute(
-                "INSERT INTO t_p69695632_auto_ad_publisher.users (username, password_hash) VALUES (%s, %s) RETURNING id",
-                (username, password_hash)
+                "INSERT INTO t_p69695632_auto_ad_publisher.users (username, password_hash, phone) VALUES (%s, %s, %s) RETURNING id",
+                (username, password_hash, phone)
             )
             user_id = cur.fetchone()[0]
             conn.commit()

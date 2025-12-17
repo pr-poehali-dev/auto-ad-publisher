@@ -7,9 +7,10 @@ interface HeaderProps {
   username?: string | null;
   onLoginClick?: () => void;
   onLogoutClick?: () => void;
+  onProfileClick?: () => void;
 }
 
-export const Header = ({ activeTab, setActiveTab, username, onLoginClick, onLogoutClick }: HeaderProps) => {
+export const Header = ({ activeTab, setActiveTab, username, onLoginClick, onLogoutClick, onProfileClick }: HeaderProps) => {
   return (
     <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
@@ -29,9 +30,12 @@ export const Header = ({ activeTab, setActiveTab, username, onLoginClick, onLogo
           <div className="flex items-center gap-3">
             {username ? (
               <>
-                <span className="text-sm text-muted-foreground hidden sm:inline">
+                <button
+                  onClick={onProfileClick}
+                  className="text-sm text-primary hover:underline hidden sm:inline cursor-pointer"
+                >
                   {username}
-                </span>
+                </button>
                 <Button variant="outline" size="sm" onClick={onLogoutClick}>
                   Выйти
                 </Button>
